@@ -1,4 +1,8 @@
 node_modules/
-dist/
 out/
+dist/
+dist-electron/
+*.log
 .DS_Store
+.env
+.env.*
