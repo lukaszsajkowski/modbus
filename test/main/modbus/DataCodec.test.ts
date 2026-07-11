@@ -32,3 +32,30 @@ describe('DataCodec 16-bit', () => {
     expect(decode(encode(16.0, spec), spec)).toBeCloseTo(16.0, 5)
   })
 })
+
+describe('DataCodec 32-bit', () => {
+  it('decodes uint32 AB (0x0001, 0x0000 -> 65536)', () => {
+    expect(decode([0x0001, 0x0000], { type: 'uint32' })).toBe(65536)
+  })
+
+  it('decodes uint32 BA word-swapped (0x0000, 0x0001 -> 65536)', () => {
+    expect(decode([0x0000, 0x0001], { type: 'uint32', wordOrder: 'BA' })).toBe(65536)
+  })
+
+  it('decodes int32 negative (-2)', () => {
+    expect(decode([0xffff, 0xfffe], { type: 'int32' })).toBe(-2)
+  })
+
+  it('decodes float32 AB (1.0 = 0x3F80 0x0000)', () => {
+    expect(decode([0x3f80, 0x0000], { type: 'float32' })).toBeCloseTo(1.0, 5)
+  })
+
+  it('encodes float32 AB (1.0 -> [0x3F80, 0x0000])', () => {
+    expect(encode(1.0, { type: 'float32' })).toEqual([0x3f80, 0x0000])
+  })
+
+  it('round-trips int32 with word swap', () => {
+    const spec = { type: 'int32' as const, wordOrder: 'BA' as const }
+    expect(decode(encode(-123456, spec), spec)).toBe(-123456)
+  })
+})
