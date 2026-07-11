@@ -1,5 +1,8 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
+import { CH } from '../main/ipc/channels'
 
-contextBridge.exposeInMainWorld('api', {
-  version: () => process.versions.electron
-})
+const api = {
+  listPorts: () => ipcRenderer.invoke(CH.listPorts)
+}
+
+contextBridge.exposeInMainWorld('api', api)
