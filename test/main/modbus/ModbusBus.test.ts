@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { ModbusBus } from '../../../src/main/modbus/ModbusBus'
 import type { ModbusTransport } from '../../../src/main/modbus/types'
 
@@ -76,5 +76,41 @@ describe('ModbusBus priority', () => {
     await Promise.all([busy, pollP, userP])
 
     expect(order).toEqual(['busy', 'user', 'poll'])
+  })
+})
+
+describe('ModbusBus timing', () => {
+  it('waits interFrameDelayMs between operations', async () => {
+    vi.useFakeTimers()
+    try {
+      const bus = new ModbusBus(fakeTransport(), { interFrameDelayMs: 50 })
+      const order: string[] = []
+      const p1 = bus.enqueue(async () => order.push('a'))
+      const p2 = bus.enqueue(async () => order.push('b'))
+
+      await p1
+      expect(order).toEqual(['a'])   // druga czeka na delay
+      await vi.advanceTimersByTimeAsync(50)
+      await p2
+      expect(order).toEqual(['a', 'b'])
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('rejects with code TIMEOUT and keeps the queue alive', async () => {
+    vi.useFakeTimers()
+    try {
+      const bus = new ModbusBus(fakeTransport(), { interFrameDelayMs: 0, defaultTimeoutMs: 100 })
+      const stuck = bus.enqueue(() => new Promise<void>(() => {})) // nigdy nie kończy
+      const next = bus.enqueue(async () => 'ok')
+
+      const assertion = expect(stuck).rejects.toMatchObject({ code: 'TIMEOUT' })
+      await vi.advanceTimersByTimeAsync(100)
+      await assertion
+      await expect(next).resolves.toBe('ok')
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
