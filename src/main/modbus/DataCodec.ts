@@ -57,10 +57,10 @@ export function decode(registers: number[], spec: CodecSpec): number {
     }
     case 'float32': {
       const [hi, lo] = words32(registers, spec.wordOrder ?? 'AB')
-      const buf = Buffer.alloc(4)
-      buf.writeUInt16BE(hi, 0)
-      buf.writeUInt16BE(lo, 2)
-      raw = buf.readFloatBE(0)
+      const dv = new DataView(new ArrayBuffer(4))
+      dv.setUint16(0, hi, false) // false = big-endian
+      dv.setUint16(2, lo, false)
+      raw = dv.getFloat32(0, false)
       break
     }
     default:
@@ -85,10 +85,10 @@ export function encode(value: number, spec: CodecSpec): number[] {
       return split32(u, spec.wordOrder ?? 'AB')
     }
     case 'float32': {
-      const buf = Buffer.alloc(4)
-      buf.writeFloatBE((value - offset) / scale, 0)
-      const hi = buf.readUInt16BE(0)
-      const lo = buf.readUInt16BE(2)
+      const dv = new DataView(new ArrayBuffer(4))
+      dv.setFloat32(0, (value - offset) / scale, false)
+      const hi = dv.getUint16(0, false)
+      const lo = dv.getUint16(2, false)
       return spec.wordOrder === 'BA' ? [lo, hi] : [hi, lo]
     }
     default:
