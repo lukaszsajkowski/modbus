@@ -38,4 +38,6 @@ export interface ModbusTransport {
   read(req: ReadRequest): Promise<number[]>
   write(req: WriteRequest): Promise<void>
   isOpen(): boolean
+  /** Optional: notified when the underlying link drops (real serial ports only). */
+  onClose?(cb: () => void): void
 }

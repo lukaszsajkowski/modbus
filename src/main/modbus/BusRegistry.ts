@@ -1,5 +1,5 @@
 import { ModbusBus } from './ModbusBus'
-import { ModbusSerialTransport } from './ModbusSerialTransport'
+import { makeTransportForPath } from './transportFactory'
 import type { SerialParams } from './types'
 
 export class BusRegistry {
@@ -11,8 +11,8 @@ export class BusRegistry {
 
   async open(params: SerialParams, onClose?: () => void): Promise<ModbusBus> {
     await this.close(params.path)
-    const transport = new ModbusSerialTransport()
-    if (onClose) transport.onClose(onClose)
+    const transport = makeTransportForPath(params.path)
+    if (onClose) transport.onClose?.(onClose)
     await transport.connect(params)
     const bus = new ModbusBus(transport, {
       interFrameDelayMs: 20,
