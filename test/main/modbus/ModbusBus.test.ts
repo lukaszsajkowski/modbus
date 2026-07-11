@@ -51,3 +51,30 @@ describe('ModbusBus serialization', () => {
     await expect(p2).resolves.toBe('ok')
   })
 })
+
+describe('ModbusBus priority', () => {
+  it('runs user operations before poll when both are queued', async () => {
+    const bus = new ModbusBus(fakeTransport(), { interFrameDelayMs: 0 })
+    const gate = deferred<void>()
+    const order: string[] = []
+
+    // pierwsza operacja trzyma magistralę zajętą (blokuje pętlę)
+    const busy = bus.enqueue(async () => {
+      await gate.promise
+      order.push('busy')
+    })
+
+    // w tej kolejności trafiają do kolejki: poll, potem user
+    const pollP = bus.enqueue(async () => {
+      order.push('poll')
+    }, 'poll')
+    const userP = bus.enqueue(async () => {
+      order.push('user')
+    }, 'user')
+
+    gate.resolve()
+    await Promise.all([busy, pollP, userP])
+
+    expect(order).toEqual(['busy', 'user', 'poll'])
+  })
+})
