@@ -1,21 +1,45 @@
 {
   "name": "modbus-rtu-tester",
   "version": "0.1.0",
+  "description": "Desktop tester for Modbus RTU devices over USB↔RS-485 (macOS)",
+  "author": "Lukasz Sajkowski",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "start": "electron-vite preview",
+    "dist": "npm run build && electron-builder --mac",
     "test": "vitest run",
     "test:watch": "vitest",
     "postinstall": "node node_modules/electron/install.js"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
-  "description": "",
+  "build": {
+    "appId": "com.lsajkowski.modbus-rtu-tester",
+    "productName": "Modbus RTU Tester",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": "arm64"
+        }
+      ],
+      "category": "public.app-category.developer-tools",
+      "identity": null
+    }
+  },
   "dependencies": {
-    "electron": "^43.1.0",
     "electron-store": "^8.2.0",
     "modbus-serial": "^8.0.25",
     "serialport": "^13.0.0"
@@ -24,6 +48,8 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
     "playwright": "^1.61.1",
     "react": "^19.2.7",
