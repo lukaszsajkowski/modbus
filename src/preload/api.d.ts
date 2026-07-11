@@ -24,6 +24,7 @@ export interface RendererApi {
   onPollUpdate: (cb: (u: PollUpdate) => void) => () => void
   dashboardsGet: () => Promise<DashboardLayout[]>
   dashboardSave: (layout: DashboardLayout) => Promise<{ ok: true }>
+  onBusStatus: (cb: (s: { port: string; state: 'connected' | 'disconnected'; message?: string }) => void) => () => void
 }
 
 declare global {

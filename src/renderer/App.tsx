@@ -4,6 +4,7 @@ import { ScannerView } from './views/ScannerView'
 import { ReadWriteView } from './views/ReadWriteView'
 import { DeviceTestView } from './views/DeviceTestView'
 import { DashboardView } from './views/DashboardView'
+import { SettingsView } from './views/SettingsView'
 import type { SerialParams } from '../main/modbus/types'
 
 type Tab = 'connection' | 'scanner' | 'readwrite' | 'devicetest' | 'dashboard' | 'settings'
@@ -11,6 +12,13 @@ type Tab = 'connection' | 'scanner' | 'readwrite' | 'devicetest' | 'dashboard' |
 export default function App(): React.JSX.Element {
   const [tab, setTab] = useState<Tab>('connection')
   const [params, setParams] = useState<SerialParams | null>(null)
+  const [busBanner, setBusBanner] = React.useState<string | null>(null)
+  React.useEffect(() => {
+    const unsub = window.api.onBusStatus((s) => {
+      setBusBanner(s.state === 'disconnected' ? `Rozłączono: ${s.port} ${s.message ?? ''}` : null)
+    })
+    return unsub
+  }, [])
 
   const tabs: Array<[Tab, string]> = [
     ['connection', 'Połączenie'],
@@ -24,6 +32,7 @@ export default function App(): React.JSX.Element {
   return (
     <div style={{ fontFamily: 'system-ui', padding: 16 }}>
       <h1>Modbus RTU Tester</h1>
+      {busBanner && <div style={{ background: '#fdd', padding: 8, marginBottom: 8 }}>{busBanner}</div>}
       <nav style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {tabs.map(([id, label]) => (
           <button key={id} onClick={() => setTab(id)} disabled={tab === id}>{label}</button>
@@ -35,6 +44,7 @@ export default function App(): React.JSX.Element {
       {tab === 'readwrite' && params && <ReadWriteView params={params} />}
       {tab === 'devicetest' && params && <DeviceTestView params={params} />}
       {tab === 'dashboard' && params && <DashboardView params={params} />}
+      {tab === 'settings' && <SettingsView />}
       {/* kolejne widoki dopinane w następnych taskach */}
       <footer style={{ marginTop: 24, color: '#888' }}>
         {params ? `Aktywny port: ${params.path} @ ${params.baudRate} ${params.parity}` : 'Brak połączenia'}

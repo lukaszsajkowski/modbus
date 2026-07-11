@@ -5,6 +5,11 @@ export class ModbusSerialTransport implements ModbusTransport {
   private client = new ModbusRTU()
   private open = false
   private timeoutMs = 1000
+  private closeCb: (() => void) | null = null
+
+  onClose(cb: () => void): void {
+    this.closeCb = cb
+  }
 
   async connect(params: SerialParams): Promise<void> {
     this.timeoutMs = params.timeoutMs
@@ -16,6 +21,9 @@ export class ModbusSerialTransport implements ModbusTransport {
     })
     this.client.setTimeout(params.timeoutMs)
     this.open = true
+    const port = (this.client as unknown as { _port?: { on?: (ev: string, fn: () => void) => void } })._port
+    port?.on?.('close', () => { this.open = false; this.closeCb?.() })
+    port?.on?.('error', () => { this.open = false; this.closeCb?.() })
   }
 
   async close(): Promise<void> {

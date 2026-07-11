@@ -22,7 +22,12 @@ const api = {
     return () => ipcRenderer.removeListener(CH.pollUpdate, listener)
   },
   dashboardsGet: () => ipcRenderer.invoke(CH.dashboardsGet),
-  dashboardSave: (layout: unknown) => ipcRenderer.invoke(CH.dashboardSave, layout)
+  dashboardSave: (layout: unknown) => ipcRenderer.invoke(CH.dashboardSave, layout),
+  onBusStatus: (cb: (s: unknown) => void) => {
+    const listener = (_e: unknown, s: unknown): void => cb(s)
+    ipcRenderer.on(CH.busStatus, listener)
+    return () => ipcRenderer.removeListener(CH.busStatus, listener)
+  }
 }
 
 contextBridge.exposeInMainWorld('api', api)

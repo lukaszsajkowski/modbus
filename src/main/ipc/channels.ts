@@ -15,5 +15,6 @@ export const CH = {
   pollStop: 'poll:stop',
   pollUpdate: 'poll:update',
   dashboardsGet: 'dashboards:get',
-  dashboardSave: 'dashboards:save'
+  dashboardSave: 'dashboards:save',
+  busStatus: 'bus:status'
 } as const

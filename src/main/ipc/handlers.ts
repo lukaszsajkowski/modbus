@@ -20,7 +20,12 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(CH.listPorts, async () => listSerialPorts())
 
   ipcMain.handle(CH.connect, async (_e, params: SerialParams) => {
-    await registry.open(params)
+    await registry.open(params, () => {
+      for (const win of BrowserWindow.getAllWindows())
+        win.webContents.send(CH.busStatus, { port: params.path, state: 'disconnected', message: 'Port zamknięty' })
+    })
+    for (const win of BrowserWindow.getAllWindows())
+      win.webContents.send(CH.busStatus, { port: params.path, state: 'connected' })
     return { ok: true }
   })
 

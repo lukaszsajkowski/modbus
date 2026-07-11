@@ -9,9 +9,10 @@ export class BusRegistry {
     return this.buses.get(path)
   }
 
-  async open(params: SerialParams): Promise<ModbusBus> {
+  async open(params: SerialParams, onClose?: () => void): Promise<ModbusBus> {
     await this.close(params.path)
     const transport = new ModbusSerialTransport()
+    if (onClose) transport.onClose(onClose)
     await transport.connect(params)
     const bus = new ModbusBus(transport, {
       interFrameDelayMs: 20,
