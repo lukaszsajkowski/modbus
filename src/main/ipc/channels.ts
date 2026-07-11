@@ -10,5 +10,10 @@ export const CH = {
   profilesList: 'profiles:list',
   profileGet: 'profiles:get',
   registerMapGet: 'regmap:get',
-  registerMapSet: 'regmap:set'
+  registerMapSet: 'regmap:set',
+  pollStart: 'poll:start',
+  pollStop: 'poll:stop',
+  pollUpdate: 'poll:update',
+  dashboardsGet: 'dashboards:get',
+  dashboardSave: 'dashboards:save'
 } as const

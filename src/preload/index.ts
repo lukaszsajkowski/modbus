@@ -13,7 +13,16 @@ const api = {
   profilesList: () => ipcRenderer.invoke(CH.profilesList),
   profileGet: (id: string) => ipcRenderer.invoke(CH.profileGet, id),
   registerMapGet: (id: string) => ipcRenderer.invoke(CH.registerMapGet, id),
-  registerMapSet: (id: string, map: unknown) => ipcRenderer.invoke(CH.registerMapSet, id, map)
+  registerMapSet: (id: string, map: unknown) => ipcRenderer.invoke(CH.registerMapSet, id, map),
+  pollStart: (points: unknown) => ipcRenderer.invoke(CH.pollStart, points),
+  pollStop: () => ipcRenderer.invoke(CH.pollStop),
+  onPollUpdate: (cb: (u: unknown) => void) => {
+    const listener = (_e: unknown, u: unknown): void => cb(u)
+    ipcRenderer.on(CH.pollUpdate, listener)
+    return () => ipcRenderer.removeListener(CH.pollUpdate, listener)
+  },
+  dashboardsGet: () => ipcRenderer.invoke(CH.dashboardsGet),
+  dashboardSave: (layout: unknown) => ipcRenderer.invoke(CH.dashboardSave, layout)
 }
 
 contextBridge.exposeInMainWorld('api', api)

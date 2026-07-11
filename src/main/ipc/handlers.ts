@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import { CH } from './channels'
 import { listSerialPorts } from '../modbus/SerialPortService'
 import { BusRegistry } from '../modbus/BusRegistry'
@@ -7,9 +7,11 @@ import { makeScanTarget } from '../modbus/TransportScanTarget'
 import { quickScan, deepScan } from '../modbus/Scanner'
 import type { QuickScanOptions, DeepScanOptions } from '../modbus/Scanner'
 import { createAppStore } from '../store/Store'
+import type { DashboardLayout } from '../store/Store'
 import { busRead, busWrite } from '../modbus/operations'
 import type { SerialParams, ReadRequest, WriteRequest } from '../modbus/types'
 import { loadBuiltinProfiles, getProfileById } from '../profiles/DeviceProfiles'
+import { PollingEngine, type DashboardPoint } from '../modbus/PollingEngine'
 
 export function registerIpcHandlers(): void {
   const registry = new BusRegistry()
@@ -62,6 +64,32 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(CH.registerMapGet, async (_e, id: string) => store.getRegisterMap(id))
   ipcMain.handle(CH.registerMapSet, async (_e, id: string, map: Record<string, string>) => {
     store.setRegisterMap(id, map)
+    return { ok: true }
+  })
+
+  const polling = new PollingEngine({
+    readPoint: async (p: DashboardPoint) => {
+      const bus = registry.get(p.port)
+      if (!bus) return { ok: false, code: 'NOT_CONNECTED', message: `Port ${p.port} not connected` }
+      return busRead(bus, { slave: p.slave, fc: p.fc, addr: p.addr, count: 1 }, 'poll')
+    },
+    emit: (u) => {
+      for (const win of BrowserWindow.getAllWindows()) win.webContents.send(CH.pollUpdate, u)
+    },
+    now: () => Date.now()
+  })
+
+  ipcMain.handle(CH.pollStart, async (_e, points: DashboardPoint[]) => {
+    polling.start(points)
+    return { ok: true }
+  })
+  ipcMain.handle(CH.pollStop, async () => {
+    polling.stop()
+    return { ok: true }
+  })
+  ipcMain.handle(CH.dashboardsGet, async () => store.getDashboards())
+  ipcMain.handle(CH.dashboardSave, async (_e, layout: DashboardLayout) => {
+    store.saveDashboard(layout)
     return { ok: true }
   })
 }

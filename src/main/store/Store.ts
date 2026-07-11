@@ -1,4 +1,5 @@
 import type { SerialParams } from '../modbus/types'
+import type { DashboardPoint } from '../modbus/PollingEngine'
 
 export interface ConnectionProfile {
   name: string
@@ -13,7 +14,7 @@ export interface ScanRecord {
 
 export interface DashboardLayout {
   name: string
-  points: unknown[]
+  points: DashboardPoint[]
 }
 
 export interface StoreShape {
