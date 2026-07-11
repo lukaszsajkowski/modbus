@@ -3,6 +3,7 @@ import type { SerialParams } from '../main/modbus/types'
 import type { QuickScanOptions, DeepScanOptions, ScanResult, DeepScanResult } from '../main/modbus/Scanner'
 import type { ScanRecord } from '../main/store/Store'
 import type { ReadRequest, WriteRequest, Result } from '../main/modbus/types'
+import type { DeviceProfile } from '../main/profiles/schema'
 
 export interface RendererApi {
   listPorts: () => Promise<PortInfo[]>
@@ -13,6 +14,10 @@ export interface RendererApi {
   lastScan: () => Promise<ScanRecord | null>
   read: (port: string, req: ReadRequest) => Promise<Result<number[]>>
   write: (port: string, req: WriteRequest) => Promise<Result<void>>
+  profilesList: () => Promise<Array<{ id: string; name: string }>>
+  profileGet: (id: string) => Promise<DeviceProfile | null>
+  registerMapGet: (id: string) => Promise<Record<string, string>>
+  registerMapSet: (id: string, map: Record<string, string>) => Promise<{ ok: true }>
 }
 
 declare global {

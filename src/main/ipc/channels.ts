@@ -6,5 +6,9 @@ export const CH = {
   scanDeep: 'scan:deep',
   lastScan: 'scan:last',
   read: 'modbus:read',
-  write: 'modbus:write'
+  write: 'modbus:write',
+  profilesList: 'profiles:list',
+  profileGet: 'profiles:get',
+  registerMapGet: 'regmap:get',
+  registerMapSet: 'regmap:set'
 } as const

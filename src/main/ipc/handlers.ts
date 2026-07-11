@@ -9,6 +9,7 @@ import type { QuickScanOptions, DeepScanOptions } from '../modbus/Scanner'
 import { createAppStore } from '../store/Store'
 import { busRead, busWrite } from '../modbus/operations'
 import type { SerialParams, ReadRequest, WriteRequest } from '../modbus/types'
+import { loadBuiltinProfiles, getProfileById } from '../profiles/DeviceProfiles'
 
 export function registerIpcHandlers(): void {
   const registry = new BusRegistry()
@@ -54,5 +55,13 @@ export function registerIpcHandlers(): void {
     const bus = registry.get(port)
     if (!bus) return { ok: false, code: 'NOT_CONNECTED', message: `Port ${port} not connected` }
     return busWrite(bus, req)
+  })
+
+  ipcMain.handle(CH.profilesList, async () => loadBuiltinProfiles().map((p) => ({ id: p.id, name: p.name })))
+  ipcMain.handle(CH.profileGet, async (_e, id: string) => getProfileById(id) ?? null)
+  ipcMain.handle(CH.registerMapGet, async (_e, id: string) => store.getRegisterMap(id))
+  ipcMain.handle(CH.registerMapSet, async (_e, id: string, map: Record<string, string>) => {
+    store.setRegisterMap(id, map)
+    return { ok: true }
   })
 }

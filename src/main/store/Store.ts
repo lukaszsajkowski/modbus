@@ -56,6 +56,17 @@ export class AppStore {
     const existing = this.getDashboards().filter((d) => d.name !== layout.name)
     this.backend.set('dashboards', [...existing, layout])
   }
+
+  getRegisterMap(profileId: string): Record<string, string> {
+    const all = this.backend.get<Record<string, Record<string, string>>>('registerMaps') ?? {}
+    return all[profileId] ?? {}
+  }
+
+  setRegisterMap(profileId: string, map: Record<string, string>): void {
+    const all = this.backend.get<Record<string, Record<string, string>>>('registerMaps') ?? {}
+    all[profileId] = map
+    this.backend.set('registerMaps', all)
+  }
 }
 
 import Store from 'electron-store'

@@ -9,7 +9,11 @@ const api = {
   scanDeep: (opts: unknown) => ipcRenderer.invoke(CH.scanDeep, opts),
   lastScan: () => ipcRenderer.invoke(CH.lastScan),
   read: (port: string, req: unknown) => ipcRenderer.invoke(CH.read, port, req),
-  write: (port: string, req: unknown) => ipcRenderer.invoke(CH.write, port, req)
+  write: (port: string, req: unknown) => ipcRenderer.invoke(CH.write, port, req),
+  profilesList: () => ipcRenderer.invoke(CH.profilesList),
+  profileGet: (id: string) => ipcRenderer.invoke(CH.profileGet, id),
+  registerMapGet: (id: string) => ipcRenderer.invoke(CH.registerMapGet, id),
+  registerMapSet: (id: string, map: unknown) => ipcRenderer.invoke(CH.registerMapSet, id, map)
 }
 
 contextBridge.exposeInMainWorld('api', api)
