@@ -110,7 +110,7 @@ export function ConnectionView({
         <input type="number" value={timeoutMs} onChange={(e) => setTimeoutMs(Number(e.target.value))} />
       </label>
       <div style={{ marginTop: 8 }}>
-        <button onClick={connect} disabled={!path}>Połącz</button>{' '}
+        <button className="primary" onClick={connect} disabled={!path}>Połącz</button>{' '}
         <button onClick={disconnect} disabled={!path}>Rozłącz</button>
         <span style={{ marginLeft: 12 }}>Status: {status}</span>
       </div>

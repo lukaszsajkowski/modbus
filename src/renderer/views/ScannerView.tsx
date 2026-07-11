@@ -61,12 +61,12 @@ export function ScannerView({ params }: { params: SerialParams }): React.JSX.Ele
       </label>
       <label>{' '}Od:{' '}<input type="number" value={from} onChange={(e) => setFrom(Number(e.target.value))} /></label>
       <label>{' '}Do:{' '}<input type="number" value={to} onChange={(e) => setTo(Number(e.target.value))} /></label>
-      <button onClick={run} disabled={busy} style={{ marginLeft: 8 }}>Skanuj</button>
+      <button className="primary" onClick={run} disabled={busy} style={{ marginLeft: 8 }}>Skanuj</button>
       <p>{msg}</p>
       {foundParams && (
         <p>Działająca konfiguracja: {foundParams.baudRate} {foundParams.parity} {foundParams.stopBits}</p>
       )}
-      <table border={1} cellPadding={4}>
+      <table>
         <thead><tr><th>Adres slave</th><th>Status</th></tr></thead>
         <tbody>
           {found.map((s) => <tr key={s}><td>{s}</td><td>online</td></tr>)}

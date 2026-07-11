@@ -30,24 +30,39 @@ export default function App(): React.JSX.Element {
   ]
 
   return (
-    <div style={{ fontFamily: 'system-ui', padding: 16 }}>
-      <h1>Modbus RTU Tester</h1>
-      {busBanner && <div style={{ background: '#fdd', padding: 8, marginBottom: 8 }}>{busBanner}</div>}
-      <nav style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {tabs.map(([id, label]) => (
-          <button key={id} onClick={() => setTab(id)} disabled={tab === id}>{label}</button>
-        ))}
-      </nav>
-      {tab === 'connection' && <ConnectionView onConnected={setParams} />}
-      {tab !== 'connection' && !params && <p>Najpierw połącz się w zakładce „Połączenie".</p>}
-      {tab === 'scanner' && params && <ScannerView params={params} />}
-      {tab === 'readwrite' && params && <ReadWriteView params={params} />}
-      {tab === 'devicetest' && params && <DeviceTestView params={params} />}
-      {tab === 'dashboard' && params && <DashboardView params={params} />}
-      {tab === 'settings' && <SettingsView />}
-      {/* kolejne widoki dopinane w następnych taskach */}
-      <footer style={{ marginTop: 24, color: '#888' }}>
-        {params ? `Aktywny port: ${params.path} @ ${params.baudRate} ${params.parity}` : 'Brak połączenia'}
+    <div className="app">
+      <header className="topbar">
+        <h1 className="brand">Modbus RTU Tester</h1>
+        {busBanner && <div className="banner">{busBanner}</div>}
+        <nav className="tabs">
+          {tabs.map(([id, label]) => (
+            <button
+              key={id}
+              className={tab === id ? 'tab active' : 'tab'}
+              onClick={() => setTab(id)}
+              disabled={tab === id}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+      </header>
+      <main className="content">
+        {tab === 'connection' && <ConnectionView onConnected={setParams} />}
+        {tab !== 'connection' && tab !== 'settings' && !params && (
+          <p>Najpierw połącz się w zakładce „Połączenie".</p>
+        )}
+        {tab === 'scanner' && params && <ScannerView params={params} />}
+        {tab === 'readwrite' && params && <ReadWriteView params={params} />}
+        {tab === 'devicetest' && params && <DeviceTestView params={params} />}
+        {tab === 'dashboard' && params && <DashboardView params={params} />}
+        {tab === 'settings' && <SettingsView />}
+      </main>
+      <footer className="statusbar">
+        <span className={params ? 'dot ok' : 'dot'} />
+        {params
+          ? `Połączony port: ${params.path} @ ${params.baudRate} ${params.parity}`
+          : 'Brak połączenia'}
       </footer>
     </div>
   )

@@ -68,7 +68,7 @@ export function ReadWriteView({ params }: { params: SerialParams }): React.JSX.E
             {READ_FCS.map((f) => <option key={f} value={f}>FC{String(f).padStart(2, '0')}</option>)}
           </select>
         </label>
-        <button onClick={doRead} style={{ marginLeft: 8 }}>Odczytaj</button>
+        <button className="primary" onClick={doRead} style={{ marginLeft: 8 }}>Odczytaj</button>
       </div>
       <div style={{ marginTop: 8 }}>
         <label>Write FC:{' '}

@@ -63,19 +63,19 @@ export function DashboardView({ params }: { params: SerialParams }): React.JSX.E
         <button onClick={addPoint} style={{ marginLeft: 8 }}>Dodaj punkt</button>
       </div>
       <div style={{ marginTop: 8 }}>
-        <button onClick={start} disabled={running || points.length === 0}>Start</button>{' '}
+        <button className="primary" onClick={start} disabled={running || points.length === 0}>Start</button>{' '}
         <button onClick={stop} disabled={!running}>Stop</button>{' '}
         <input value={layoutName} onChange={(e) => setLayoutName(e.target.value)} />
         <button onClick={saveLayout}>Zapisz układ</button>{' '}
         <button onClick={loadLayout}>Wczytaj układ</button>
       </div>
-      <table border={1} cellPadding={4} style={{ marginTop: 8 }}>
+      <table>
         <thead><tr><th>Slave</th><th>Addr</th><th>Typ</th><th>Wartość</th><th>Quality</th><th>Czas</th></tr></thead>
         <tbody>
           {points.map((p) => {
             const u = live[p.id]
             return (
-              <tr key={p.id} style={{ background: u?.quality === 'bad' ? '#fdd' : undefined }}>
+              <tr key={p.id} className={u?.quality === 'bad' ? 'bad-row' : undefined}>
                 <td>{p.slave}</td><td>{p.addr}</td><td>{p.type}</td>
                 <td>{u ? (u.value ?? '—') : '…'}</td>
                 <td>{u?.quality ?? '—'}</td>

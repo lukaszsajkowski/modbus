@@ -79,9 +79,9 @@ export function DeviceTestView({ params }: { params: SerialParams }): React.JSX.
       {profile && (
         <>
           <button onClick={applySerial} style={{ marginLeft: 8 }}>Zastosuj parametry łącza</button>
-          <button onClick={readAll} style={{ marginLeft: 8 }}>Odczytaj wszystko</button>
+          <button className="primary" onClick={readAll} style={{ marginLeft: 8 }}>Odczytaj wszystko</button>
           <p>{msg}</p>
-          <table border={1} cellPadding={4}>
+          <table>
             <thead><tr><th>Mnem</th><th>Nazwa</th><th>Wartość</th><th>Akcja</th></tr></thead>
             <tbody>
               {profile.registers.map((r) => (
