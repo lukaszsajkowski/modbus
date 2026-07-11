@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { quickScan } from '../../../src/main/modbus/Scanner'
+import { quickScan, deepScan } from '../../../src/main/modbus/Scanner'
 import type { ScanTarget, Prober } from '../../../src/main/modbus/Scanner'
 import type { SerialParams } from '../../../src/main/modbus/types'
 
@@ -55,6 +55,48 @@ describe('quickScan', () => {
       signal: controller.signal
     })
     expect(probed).toBe(2)
+    expect(result.found).toEqual([])
+  })
+})
+
+describe('deepScan', () => {
+  it('finds the working config and responding slaves', async () => {
+    // odpowiada tylko przy 9600 / none / 1 na adresach 21,22
+    const target: ScanTarget = {
+      withParams: async (p) => ({
+        probe: async (slave) =>
+          p.baudRate === 9600 &&
+          p.parity === 'none' &&
+          p.stopBits === 1 &&
+          (slave === 21 || slave === 22),
+        close: async () => {}
+      })
+    }
+    const result = await deepScan(target, {
+      basePath: '/dev/x',
+      timeoutMs: 300,
+      bauds: [19200, 9600],
+      parities: ['even', 'none'],
+      stopBits: [1],
+      slaveRange: [20, 23]
+    })
+    expect(result.params).toMatchObject({ baudRate: 9600, parity: 'none', stopBits: 1 })
+    expect(result.found).toEqual([21, 22])
+  })
+
+  it('returns null params when nothing responds', async () => {
+    const target: ScanTarget = {
+      withParams: async () => ({ probe: async () => false, close: async () => {} })
+    }
+    const result = await deepScan(target, {
+      basePath: '/dev/x',
+      timeoutMs: 300,
+      bauds: [9600],
+      parities: ['none'],
+      stopBits: [1],
+      slaveRange: [1, 2]
+    })
+    expect(result.params).toBeNull()
     expect(result.found).toEqual([])
   })
 })
