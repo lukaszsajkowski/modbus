@@ -42,6 +42,8 @@ export class ModbusSerialTransport implements ModbusTransport {
         return (await this.client.readHoldingRegisters(req.addr, req.count)).data
       case 4:
         return (await this.client.readInputRegisters(req.addr, req.count)).data
+      default:
+        throw new Error(`Unsupported read FC: ${req.fc}`)
     }
   }
 
@@ -61,6 +63,8 @@ export class ModbusSerialTransport implements ModbusTransport {
       case 16:
         await this.client.writeRegisters(req.addr, req.values)
         return
+      default:
+        throw new Error(`Unsupported write FC: ${req.fc}`)
     }
   }
 }
