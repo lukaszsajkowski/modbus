@@ -1,0 +1,30 @@
+import { ModbusBus } from './ModbusBus'
+import { ModbusSerialTransport } from './ModbusSerialTransport'
+import type { SerialParams } from './types'
+
+export class BusRegistry {
+  private readonly buses = new Map<string, ModbusBus>()
+
+  get(path: string): ModbusBus | undefined {
+    return this.buses.get(path)
+  }
+
+  async open(params: SerialParams): Promise<ModbusBus> {
+    await this.close(params.path)
+    const transport = new ModbusSerialTransport()
+    await transport.connect(params)
+    const bus = new ModbusBus(transport, {
+      interFrameDelayMs: 20,
+      defaultTimeoutMs: params.timeoutMs
+    })
+    this.buses.set(params.path, bus)
+    return bus
+  }
+
+  async close(path: string): Promise<void> {
+    const bus = this.buses.get(path)
+    if (!bus) return
+    await bus.transport.close()
+    this.buses.delete(path)
+  }
+}
