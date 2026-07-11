@@ -1,28 +1,36 @@
-import React, { useEffect, useState } from 'react'
-import { api } from './lib/api'
-import type { PortInfo } from '../main/modbus/SerialPortService'
+import React, { useState } from 'react'
+import { ConnectionView } from './views/ConnectionView'
+import type { SerialParams } from '../main/modbus/types'
+
+type Tab = 'connection' | 'scanner' | 'readwrite' | 'devicetest' | 'dashboard' | 'settings'
 
 export default function App(): React.JSX.Element {
-  const [ports, setPorts] = useState<PortInfo[]>([])
-  const [error, setError] = useState<string | null>(null)
+  const [tab, setTab] = useState<Tab>('connection')
+  const [params, setParams] = useState<SerialParams | null>(null)
 
-  useEffect(() => {
-    api.listPorts().then(setPorts).catch((e) => setError(String(e)))
-  }, [])
+  const tabs: Array<[Tab, string]> = [
+    ['connection', 'Połączenie'],
+    ['scanner', 'Skaner'],
+    ['readwrite', 'Read/Write'],
+    ['devicetest', 'Test urządzenia'],
+    ['dashboard', 'Dashboard'],
+    ['settings', 'Ustawienia']
+  ]
 
   return (
     <div style={{ fontFamily: 'system-ui', padding: 16 }}>
       <h1>Modbus RTU Tester</h1>
-      <h2>Porty szeregowe</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <ul>
-        {ports.map((p) => (
-          <li key={p.path}>
-            {p.path} {p.manufacturer ? `(${p.manufacturer})` : ''}
-          </li>
+      <nav style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        {tabs.map(([id, label]) => (
+          <button key={id} onClick={() => setTab(id)} disabled={tab === id}>{label}</button>
         ))}
-      </ul>
-      {ports.length === 0 && !error && <p>Brak wykrytych portów.</p>}
+      </nav>
+      {tab === 'connection' && <ConnectionView onConnected={setParams} />}
+      {tab !== 'connection' && !params && <p>Najpierw połącz się w zakładce „Połączenie".</p>}
+      {/* kolejne widoki dopinane w następnych taskach */}
+      <footer style={{ marginTop: 24, color: '#888' }}>
+        {params ? `Aktywny port: ${params.path} @ ${params.baudRate} ${params.parity}` : 'Brak połączenia'}
+      </footer>
     </div>
   )
 }
