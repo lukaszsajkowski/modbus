@@ -8,10 +8,12 @@ import { quickScan, deepScan } from '../modbus/Scanner'
 import type { QuickScanOptions, DeepScanOptions } from '../modbus/Scanner'
 import { createAppStore } from '../store/Store'
 import type { DashboardLayout } from '../store/Store'
-import { busRead, busWrite } from '../modbus/operations'
+import { busRead, busWrite, classifyError } from '../modbus/operations'
 import type { SerialParams, ReadRequest, WriteRequest } from '../modbus/types'
 import { loadBuiltinProfiles, getProfileById } from '../profiles/DeviceProfiles'
 import { PollingEngine, type DashboardPoint } from '../modbus/PollingEngine'
+
+const regCount = (t: string): number => (t === 'uint32' || t === 'int32' || t === 'float32') ? 2 : 1
 
 export function registerIpcHandlers(): void {
   const registry = new BusRegistry()
@@ -20,13 +22,18 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(CH.listPorts, async () => listSerialPorts())
 
   ipcMain.handle(CH.connect, async (_e, params: SerialParams) => {
-    await registry.open(params, () => {
+    try {
+      await registry.open(params, () => {
+        for (const win of BrowserWindow.getAllWindows())
+          if (!win.isDestroyed()) win.webContents.send(CH.busStatus, { port: params.path, state: 'disconnected', message: 'Port zamknięty' })
+      })
       for (const win of BrowserWindow.getAllWindows())
-        win.webContents.send(CH.busStatus, { port: params.path, state: 'disconnected', message: 'Port zamknięty' })
-    })
-    for (const win of BrowserWindow.getAllWindows())
-      win.webContents.send(CH.busStatus, { port: params.path, state: 'connected' })
-    return { ok: true }
+        if (!win.isDestroyed()) win.webContents.send(CH.busStatus, { port: params.path, state: 'connected' })
+      return { ok: true as const, value: undefined }
+    } catch (e) {
+      const { code, message } = classifyError(e)
+      return { ok: false as const, code, message }
+    }
   })
 
   ipcMain.handle(CH.disconnect, async (_e, path: string) => {
@@ -35,6 +42,7 @@ export function registerIpcHandlers(): void {
   })
 
   ipcMain.handle(CH.scanQuick, async (_e, opts: QuickScanOptions) => {
+    await registry.close(opts.params.path)
     const target = makeScanTarget(() => new ModbusSerialTransport())
     const result = await quickScan(target, opts)
     store.setLastScan({ params: result.params, slaves: result.found, ts: Date.now() })
@@ -42,6 +50,7 @@ export function registerIpcHandlers(): void {
   })
 
   ipcMain.handle(CH.scanDeep, async (_e, opts: DeepScanOptions) => {
+    await registry.close(opts.basePath)
     const target = makeScanTarget(() => new ModbusSerialTransport())
     const result = await deepScan(target, opts)
     if (result.params) {
@@ -76,10 +85,11 @@ export function registerIpcHandlers(): void {
     readPoint: async (p: DashboardPoint) => {
       const bus = registry.get(p.port)
       if (!bus) return { ok: false, code: 'NOT_CONNECTED', message: `Port ${p.port} not connected` }
-      return busRead(bus, { slave: p.slave, fc: p.fc, addr: p.addr, count: 1 }, 'poll')
+      return busRead(bus, { slave: p.slave, fc: p.fc, addr: p.addr, count: regCount(p.type) }, 'poll')
     },
     emit: (u) => {
-      for (const win of BrowserWindow.getAllWindows()) win.webContents.send(CH.pollUpdate, u)
+      for (const win of BrowserWindow.getAllWindows())
+        if (!win.isDestroyed()) win.webContents.send(CH.pollUpdate, u)
     },
     now: () => Date.now()
   })

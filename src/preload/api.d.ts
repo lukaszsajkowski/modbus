@@ -8,7 +8,7 @@ import type { DashboardPoint, PollUpdate } from '../main/modbus/PollingEngine'
 
 export interface RendererApi {
   listPorts: () => Promise<PortInfo[]>
-  connect: (params: SerialParams) => Promise<{ ok: true }>
+  connect: (params: SerialParams) => Promise<Result<void>>
   disconnect: (path: string) => Promise<{ ok: true }>
   scanQuick: (opts: QuickScanOptions) => Promise<ScanResult>
   scanDeep: (opts: DeepScanOptions) => Promise<DeepScanResult>

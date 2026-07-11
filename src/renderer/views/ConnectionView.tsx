@@ -29,13 +29,13 @@ export function ConnectionView({
   const params: SerialParams = { path, baudRate, dataBits: 8, parity, stopBits, timeoutMs }
 
   async function connect(): Promise<void> {
-    try {
-      await api.connect(params)
-      setStatus(`połączony: ${path}`)
-      onConnected(params)
-    } catch (e) {
-      setStatus(`błąd: ${String(e)}`)
+    const res = await api.connect(params)
+    if (!res.ok) {
+      setStatus(`błąd: ${res.code} ${res.message}`)
+      return
     }
+    setStatus(`połączony: ${path}`)
+    onConnected(params)
   }
 
   async function disconnect(): Promise<void> {

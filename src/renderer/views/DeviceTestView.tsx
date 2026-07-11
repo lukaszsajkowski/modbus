@@ -30,7 +30,11 @@ export function DeviceTestView({ params }: { params: SerialParams }): React.JSX.
       stopBits: profile.serial.stopBits as 1 | 2,
       timeoutMs: params.timeoutMs
     }
-    await api.connect(p)
+    const res = await api.connect(p)
+    if (!res.ok) {
+      setMsg(`błąd: ${res.code} ${res.message}`)
+      return
+    }
     setMsg(`Zastosowano ${profile.serial.baud} ${profile.serial.parity} ${profile.serial.stopBits}`)
   }
 
