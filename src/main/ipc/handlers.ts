@@ -7,7 +7,8 @@ import { makeScanTarget } from '../modbus/TransportScanTarget'
 import { quickScan, deepScan } from '../modbus/Scanner'
 import type { QuickScanOptions, DeepScanOptions } from '../modbus/Scanner'
 import { createAppStore } from '../store/Store'
-import type { SerialParams } from '../modbus/types'
+import { busRead, busWrite } from '../modbus/operations'
+import type { SerialParams, ReadRequest, WriteRequest } from '../modbus/types'
 
 export function registerIpcHandlers(): void {
   const registry = new BusRegistry()
@@ -42,4 +43,16 @@ export function registerIpcHandlers(): void {
   })
 
   ipcMain.handle(CH.lastScan, async () => store.getLastScan())
+
+  ipcMain.handle(CH.read, async (_e, port: string, req: ReadRequest) => {
+    const bus = registry.get(port)
+    if (!bus) return { ok: false, code: 'NOT_CONNECTED', message: `Port ${port} not connected` }
+    return busRead(bus, req)
+  })
+
+  ipcMain.handle(CH.write, async (_e, port: string, req: WriteRequest) => {
+    const bus = registry.get(port)
+    if (!bus) return { ok: false, code: 'NOT_CONNECTED', message: `Port ${port} not connected` }
+    return busWrite(bus, req)
+  })
 }
