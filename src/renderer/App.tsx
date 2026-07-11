@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { ConnectionView } from './views/ConnectionView'
 import { ScannerView } from './views/ScannerView'
 import { ReadWriteView } from './views/ReadWriteView'
+import { DeviceTestView } from './views/DeviceTestView'
 import type { SerialParams } from '../main/modbus/types'
 
 type Tab = 'connection' | 'scanner' | 'readwrite' | 'devicetest' | 'dashboard' | 'settings'
@@ -31,6 +32,7 @@ export default function App(): React.JSX.Element {
       {tab !== 'connection' && !params && <p>Najpierw połącz się w zakładce „Połączenie".</p>}
       {tab === 'scanner' && params && <ScannerView params={params} />}
       {tab === 'readwrite' && params && <ReadWriteView params={params} />}
+      {tab === 'devicetest' && params && <DeviceTestView params={params} />}
       {/* kolejne widoki dopinane w następnych taskach */}
       <footer style={{ marginTop: 24, color: '#888' }}>
         {params ? `Aktywny port: ${params.path} @ ${params.baudRate} ${params.parity}` : 'Brak połączenia'}
