@@ -3,6 +3,7 @@ import { ConnectionView } from './views/ConnectionView'
 import { ScannerView } from './views/ScannerView'
 import { ReadWriteView } from './views/ReadWriteView'
 import { DeviceTestView } from './views/DeviceTestView'
+import { DashboardView } from './views/DashboardView'
 import type { SerialParams } from '../main/modbus/types'
 
 type Tab = 'connection' | 'scanner' | 'readwrite' | 'devicetest' | 'dashboard' | 'settings'
@@ -33,6 +34,7 @@ export default function App(): React.JSX.Element {
       {tab === 'scanner' && params && <ScannerView params={params} />}
       {tab === 'readwrite' && params && <ReadWriteView params={params} />}
       {tab === 'devicetest' && params && <DeviceTestView params={params} />}
+      {tab === 'dashboard' && params && <DashboardView params={params} />}
       {/* kolejne widoki dopinane w następnych taskach */}
       <footer style={{ marginTop: 24, color: '#888' }}>
         {params ? `Aktywny port: ${params.path} @ ${params.baudRate} ${params.parity}` : 'Brak połączenia'}
