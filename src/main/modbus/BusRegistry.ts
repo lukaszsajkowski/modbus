@@ -24,7 +24,10 @@ export class BusRegistry {
   async close(path: string): Promise<void> {
     const bus = this.buses.get(path)
     if (!bus) return
-    await bus.transport.close()
-    this.buses.delete(path)
+    try {
+      await bus.transport.close()
+    } finally {
+      this.buses.delete(path)
+    }
   }
 }
